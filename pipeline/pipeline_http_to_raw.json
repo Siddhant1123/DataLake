@@ -1,0 +1,180 @@
+{
+	"name": "pipeline_http_to_raw",
+	"properties": {
+		"activities": [
+			{
+				"name": "http_to_raw",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "HttpReadSettings",
+							"requestMethod": "GET"
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['id']"
+								},
+								"sink": {
+									"name": "id"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']"
+								},
+								"sink": {
+									"name": "name"
+								}
+							},
+							{
+								"source": {
+									"path": "$['username']"
+								},
+								"sink": {
+									"name": "username"
+								}
+							},
+							{
+								"source": {
+									"path": "$['email']"
+								},
+								"sink": {
+									"name": "email"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['street']"
+								},
+								"sink": {
+									"name": "street"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['suite']"
+								},
+								"sink": {
+									"name": "suite"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['city']"
+								},
+								"sink": {
+									"name": "city"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['zipcode']"
+								},
+								"sink": {
+									"name": "zipcode"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['geo']['lat']"
+								},
+								"sink": {
+									"name": "lat"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['geo']['lng']"
+								},
+								"sink": {
+									"name": "lng"
+								}
+							},
+							{
+								"source": {
+									"path": "$['phone']"
+								},
+								"sink": {
+									"name": "phone"
+								}
+							},
+							{
+								"source": {
+									"path": "$['website']"
+								},
+								"sink": {
+									"name": "website"
+								}
+							},
+							{
+								"source": {
+									"path": "$['company']['name']"
+								},
+								"sink": {
+									"name": "company_name"
+								}
+							},
+							{
+								"source": {
+									"path": "$['company']['catchPhrase']"
+								},
+								"sink": {
+									"name": "catchPhrase"
+								}
+							},
+							{
+								"source": {
+									"path": "$['company']['bs']"
+								},
+								"sink": {
+									"name": "bs"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Json1",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Parquet1",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}
