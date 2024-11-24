@@ -1,0 +1,9 @@
+{
+	"name": "factory-dev-data",
+	"location": "canadacentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "76a1aa4e-2636-475f-ab22-953c3316663b",
+		"tenantId": "84bc1fd2-8410-4bf4-ba5c-a0fd00d45deb"
+	}
+}
