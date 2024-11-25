@@ -1,0 +1,57 @@
+{
+	"name": "dataset_sql",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "Rank",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "Player",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Nation",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Confederation",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Goals",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "Caps",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "Goals_per_match",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Career_span",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Date_of_50th_goal",
+				"type": "date"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "football"
+		}
+	}
+}
