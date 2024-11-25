@@ -1,0 +1,19 @@
+{
+	"name": "ls_storage",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://casestudy1new.dfs.core.windows.net/",
+			"accountKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "storage",
+				"secretVersion": "a9c1cc12c45348d3b1974e246b8cfc65"
+			}
+		}
+	}
+}
