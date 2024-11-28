@@ -1,114 +1,143 @@
 # DataLake
-## Overview
+# Data Ingestion, Transformation, and Storage in Azure
 
-This project involves the ingestion, transformation, and storage of data in Azure Data Lake Storage (ADLS) Gen2, leveraging Azure Data Factory (ADF), Databricks, and various Azure services for security and performance optimization. The data comes from two sources:
-1. **HTTP API** (from `https://jsonplaceholder.typicode.com/users` in JSON format)
-2. **Microsoft SQL Server** (via self-hosted integration runtime)
+This project focuses on ingesting, transforming, and storing data within **Azure Data Lake Storage (ADLS) Gen2**, leveraging **Azure Data Factory (ADF)**, **Azure Databricks**, and various **Azure services** for security, performance optimization, and scalability. The data is sourced from an **HTTP API** and **Microsoft SQL Server** and goes through a series of steps to clean, transform, and stage the data in ADLS for further use.
 
-The data is processed using Azure Databricks for cleaning, followed by saving the results in multiple containers in the same Azure Data Lake Storage Gen2 account. Additionally, the project utilizes Azure Key Vault for secure management of credentials and secrets.
+## Prerequisites:
 
-## Prerequisites
-- **Azure Data Factory** for data pipelines.
+- **Azure Data Factory** (ADF) for orchestrating data pipelines.
 - **Azure Data Lake Storage Gen2** for data storage.
-- **Azure Key Vault** for managing credentials.
-- **Databricks** for data processing.
-- **GitHub** for version control.
+- **Azure Key Vault** for securely managing credentials and secrets.
+- **Azure Databricks** for data processing.
+- **GitHub** for version control and managing the source code.
 
-## Steps Taken
+---
+
+## Steps Taken:
 
 ### 1. Setting Up Azure Data Factory (ADF)
 
 #### 1.1 Linking ADF to GitHub
-- I linked Azure Data Factory (ADF) to GitHub by creating a repository named `DataLake` for version control.
-- I made sure the repository was connected to the **Dev** branch.
+- **GitHub Repository**: Created a repository called **DataLake** for version control. This repository is connected to ADF, and the **Dev branch** is used for pipeline development.
+- **Version Control**: This ensures that all changes to the pipeline are versioned and can be tracked in the GitHub repository.
 
 #### 1.2 Creating Linked Services
-- **HTTP API to Storage**: 
-  - I created a linked service to the HTTP API `https://jsonplaceholder.typicode.com/users` to fetch data in JSON format.
-  - The data was stored in the **raw-api** container in Azure Data Lake Storage (ADLS) Gen2 in **Parquet** format.
-  - I used Azure Key Vault to store the **storage account key** as a secret for security purposes.
-  
-- **Microsoft SQL Server to Storage**:
-  - I created a linked service for Microsoft SQL Server using a **self-hosted integration runtime**. This enabled me to connect to the on-premise SQL Server.
-  - The data from SQL Server was transferred to the **raw-sql** container in ADLS Gen2 in **CSV** format.
+- **HTTP API to ADLS Gen2**:
+  - Created a linked service to fetch data from the **HTTP API** (https://jsonplaceholder.typicode.com/users).
+  - Stored the data in the **raw-api** container of ADLS Gen2 in **Parquet** format.
+  - **Azure Key Vault** was used for securely managing the **storage account key**.
+
+- **Microsoft SQL Server to ADLS Gen2**:
+  - Established a linked service to connect to the **SQL Server** using a **self-hosted integration runtime**.
+  - Transferred data to the **raw-sql** container in ADLS Gen2 in **CSV** format.
 
 #### 1.3 Creating Pipelines in ADF
-- **Pipeline 1** (HTTP API to ADLS Gen2):
-  - I used **Copy Data** activity to fetch data from the HTTP API and save it in the **raw-api** container in **Parquet** format.
-- **Pipeline 2** (SQL Server to ADLS Gen2):
-  - I used the **Copy Data** activity to copy data from Microsoft SQL Server to the **raw-sql** container in **CSV** format.
+- **Pipeline 1**: **HTTP API to ADLS Gen2**
+  - Used the **Copy Data activity** to fetch data from the HTTP API and save it in **Parquet** format in the **raw-api** container.
+
+- **Pipeline 2**: **SQL Server to ADLS Gen2**
+  - Used the **Copy Data activity** to transfer data from **SQL Server** to the **raw-sql** container in **CSV** format.
+
+---
+
+### 2. Pipeline Triggers and Branching from Dev to QA
+
+#### 2.1 Triggers for Data Pipelines
+- **Scheduled Triggers**: 
+  - Used **time-based triggers** to initiate data pipelines for periodic data ingestion.
+  - A trigger was set for **Pipeline 1** to pull the HTTP API data at a scheduled time.
+  - A trigger for **Pipeline 2** to pull data from SQL Server on a regular basis.
+
+- **Manual Triggers**: 
+  - For cases where immediate data ingestion is needed, manual triggers were employed to kick off the pipeline.
+  
+- **Trigger Dependencies**: 
+  - **Trigger 1** (HTTP API to ADLS) must complete before **Trigger 2** (SQL Server to ADLS) can begin, ensuring data is ingested in the correct order.
+  
+#### 2.2 Branching from Dev to QA
+- **Development (Dev) Branch**:
+  - Created pipelines in the **Dev** environment to validate the end-to-end data flow from ingestion to storage.
+  - All new changes and features were tested in the **Dev branch** first.
+  
+- **Quality Assurance (QA) Branch**:
+  - Once the pipelines were successfully tested in **Dev**, a **pull request** (PR) was initiated to merge the Dev branch into the **QA branch**.
+  - After approval, pipelines were deployed to the **QA environment** for further validation.
+
+- **Version Control in GitHub**: 
+  - Ensured that both **Dev** and **QA branches** are synchronized for consistent pipeline deployment across environments.
+
+---
+
+### 3. Data Processing and Transformation in Databricks
+
+#### 3.1 Setting Up Databricks Workspace
+- Mounted the **raw-api** and **raw-sql** containers from ADLS Gen2 to Databricks using **secret scopes** for secure access to storage account keys.
+- Used the following Databricks code to mount the storage accounts:
+  
+  ```python
+  dbutils.fs.mount(
+      source="wasbs://raw-api@casestudy1new.blob.core.windows.net",
+      mount_point = "/mnt/raw-api",
+      extra_configs={"fs.azure.account.key.casestudy1new.blob.core.windows.net": dbutils.secrets.get(scope = "casestudy", key = "storage")}
+  )
+
+## 3.2 Reading Data from Parquet and CSV
+
+Read data from `raw-api` (Parquet format) and `raw-sql` (CSV format) using Spark in Databricks:
+
+```python
+df_parquet = spark.read.parquet("/mnt/raw-api/users.parquet")
+df_csv = spark.read.csv("/mnt/raw-sql/dbo.football.csv", header=True, inferSchema=True)
+
+## 3.3 Data Cleaning and Transformation
+
+### Parquet Data:
+Filtered rows where the username was 'Samantha' and re-indexed the data based on the username.
+
+### CSV Data:
+Filtered out players with goals less than 80 and re-assigned the `Rank` column.
+
+## 3.4 Repartitioning and Coalescing
+
+Optimized performance by repartitioning and coalescing data:
+
+```python
+df_cleaned_coalesced = df_cleaned.coalesce(1)
 
 
-### 2. Version Control and Deployment
+## 4. Data Saving and Staging
 
-#### 2.1 Creating a QA Branch
-- After creating and testing the pipelines in the **Dev** branch, I created a **QA** branch in the GitHub repository.
-- I did a pull request (PR) from the **Dev** branch to the **QA** branch.
-- After the pull request was approved, I confirmed the pipelines were deployed successfully in the **QA** branch of Data Factory.
+### 4.1 Saving Processed Data to ADLS
 
-### 3. Data Processing in Databricks
+Saved cleaned and transformed data into the `processed-api` and `processed-sql` containers in ADLS Gen2:
 
-#### 3.1 Setting Up Databricks
-- I created a **Databricks workspace** and mounted the **raw-api** and **raw-sql** containers from ADLS Gen2 to Databricks using **secret scopes** for secure access to the storage account keys.
-  - I used the following code to mount the storage account in Databricks:
-    ```python
-    dbutils.fs.mount(
-        source="wasbs://raw-api@casestudy1new.blob.core.windows.net",
-        mount_point = "/mnt/raw-api",
-        extra_configs={"fs.azure.account.key.casestudy1new.blob.core.windows.net": dbutils.secrets.get(scope = "casestudy", key = "storage")}
-    )
-    ```
+```python
+df_cleaned_coalesced.write.mode('append').parquet("/mnt/processed-api/users_cleaned")
 
-#### 3.2 Reading Data from Parquet and CSV
-- I read the data from the mounted **raw-api** container in **Parquet** format and the **raw-sql** container in **CSV** format using Spark.
-  - For the Parquet file:
-    ```python
-    df_parquet = spark.read.parquet("/mnt/raw-api/users.parquet")
-    ```
+### 4.2 Appending Data to Staging Containers
 
-  - For the CSV file:
-    ```python
-    df_csv = spark.read.csv("/mnt/raw-sql/dbo.football.csv", header=True, inferSchema=True)
-    ```
+Transferred the cleaned data to `staging-api` and `staging-sql` containers for final staging before final analysis or processing:
 
-#### 3.3 Data Cleaning and Transformation
-- I cleaned the data by filtering out unwanted rows and re-indexing the columns.
-  - **For the Parquet data (raw-api)**:
-    - I filtered out rows where the **username** is `Samantha` and re-indexed the data based on the `username`.
-  - **For the CSV data (raw-sql)**:
-    - I filtered the data to keep only players with **Goals** greater than or equal to 80 and re-assigned the **Rank** column.
+```python
+df_cleaned_coalesced.write.mode('append').parquet("/mnt/staging-api/users_cleaned")
 
-#### 3.4 Repartitioning and Coalescing Data
-- To optimize performance, I repartitioned and coalesced the data to reduce the number of partitions before writing it back to ADLS.
-  - Example code:
-    ```python
-    df_cleaned_coalesced = df_cleaned.coalesce(1)
-    ```
 
-### 4. Saving Data to Processed Containers
+## 5. Security Best Practices
 
-#### 4.1 Saving to Processed Containers
-- I saved the cleaned and transformed data into separate processed containers:
-  - **processed-api** container for the cleaned **raw-api** data (Parquet).
-  - **processed-sql** container for the cleaned **raw-sql** data (CSV).
-  - Example code:
-    ```python
-    df_cleaned_coalesced.write.mode('append').parquet("/mnt/processed-api/users_cleaned")
-    ```
+### Azure Key Vault:
+Managed sensitive information such as storage account keys securely using Azure Key Vault. This ensures the credentials are not exposed in the code.
 
-#### 4.2 Appending Data to Staging Containers
-- After processing, I transferred the data to **staging-api** and **staging-sql** containers for final staging.
-  - Example code:
-    ```python
-    df_cleaned_coalesced.write.mode('append').parquet("/mnt/staging-api/users_cleaned")
-    ```
+### Secret Scopes:
+Databricks accessed the storage account keys securely using secret scopes to mount containers for data ingestion and saving.
 
-### 5. Security
-- I used **Azure Key Vault** to store sensitive information like storage account keys. Databricks used the secret scope to securely access the storage account keys and mount the containers for data ingestion and saving.
 
-## Conclusion
-This project demonstrates end-to-end data ingestion, transformation, and storage using **Azure Data Factory**, **Databricks**, **Azure Key Vault**, and **Azure Data Lake Storage**. The data flows from an HTTP API and a Microsoft SQL Server, and goes through the cleaning and transformation process before being saved in different containers in the storage account.
 
-This approach ensures secure data processing and optimized storage management with the help of **Azure Databricks**, **Azure Data Factory**, and **Azure Key Vault** for seamless integration and secure access to sensitive data.
+## 6. Conclusion
+
+This project implements an end-to-end solution for ingesting, processing, and storing data in Azure Data Lake Storage (ADLS) Gen2. The solution integrates Azure Data Factory (ADF) for pipeline orchestration, Azure Databricks for data transformation, and Azure Key Vault for security.
+
+By employing triggers, manual interventions, and branching strategies between Dev and QA, this project ensures smooth deployments and updates to the pipeline. The data moves securely through each stage, from ingestion to transformation and finally to staging in ADLS, ready for downstream analytics.
+
+This approach ensures optimal performance, security, and scalability for data processing in Azure, laying the groundwork for further data analysis and reporting.
 
 
