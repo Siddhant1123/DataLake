@@ -81,13 +81,16 @@ This project focuses on ingesting, transforming, and storing data within **Azure
       extra_configs={"fs.azure.account.key.casestudy1new.blob.core.windows.net": dbutils.secrets.get(scope = "casestudy", key = "storage")}
   )
 
-## 3.2 Reading Data from Parquet and CSV
-
-Read data from `raw-api` (Parquet format) and `raw-sql` (CSV format) using Spark in Databricks:
+### 3.2 Reading Data from Parquet and CSV
+Read data from **raw-api** (Parquet format) and **raw-sql** (CSV format) using **Spark** in **Databricks**:
 
 ```python
+# Reading data from Parquet
 df_parquet = spark.read.parquet("/mnt/raw-api/users.parquet")
+
+# Reading data from CSV
 df_csv = spark.read.csv("/mnt/raw-sql/dbo.football.csv", header=True, inferSchema=True)
+
 
 ## 3.3 Data Cleaning and Transformation
 
