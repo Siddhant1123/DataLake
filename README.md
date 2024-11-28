@@ -89,4 +89,9 @@ df_parquet = spark.read.parquet("/mnt/raw-api/users.parquet")
 df_csv = spark.read.csv("/mnt/raw-sql/dbo.football.csv", header=True, inferSchema=True)
 
 #### 3.3 Data Cleaning and Transformation
+**Parquet Data:
+
+
+
+
 
