@@ -89,8 +89,9 @@ This project focuses on ingesting, transforming, and storing data within **Azure
 #### 3.3 Data Cleaning and Transformation
 **Parquet Data**:
 - Filtered rows where the username was 'Samantha' and re-indexed the data based on the username.
+  
 **CSV Data**:
-  - Filtered out players with goals less than 80 and re-assigned the `Rank` column.
+- Filtered out players with goals less than 80 and re-assigned the `Rank` column.
 
 #### 3.4 Repartitioning and Coalescing
 - Optimized performance by repartitioning and coalescing data:
