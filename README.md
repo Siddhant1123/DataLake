@@ -85,7 +85,7 @@ This project focuses on ingesting, transforming, and storing data within **Azure
 #### 3.4 Repartitioning and Coalescing
 - Optimized performance by repartitioning and coalescing data:
   ```python
-df_cleaned_coalesced = df_cleaned.coalesce(1)
+ df_cleaned_coalesced = df_cleaned.coalesce(1)
 
 #### 3.1 Setting Up Databricks Workspace
 - Mounted the **raw-api** and **raw-sql** containers from ADLS Gen2 to Databricks using **secret scopes** for secure access to storage account keys.
