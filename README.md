@@ -70,6 +70,16 @@ This project focuses on ingesting, transforming, and storing data within **Azure
 
 ### 3. Data Processing and Transformation in Databricks
 
+#### 3.1 Setting Up Databricks Workspace
+- Mounted the **raw-api** and **raw-sql** containers from ADLS Gen2 to Databricks using **secret scopes** for secure access to storage account keys.
+- Used the following Databricks code to mount the storage accounts:
+  ```python
+   dbutils.fs.mount(
+      source="wasbs://raw-api@casestudy1new.blob.core.windows.net",
+      mount_point = "/mnt/raw-api",
+      extra_configs={"fs.azure.account.key.casestudy1new.blob.core.windows.net": dbutils.secrets.get(scope = "casestudy", key = "storage")}
+  )
+
 #### 3.2 Reading Data from Parquet and CSV 
 - Read data from `raw-api` (Parquet format) and `raw-sql` (CSV format) using Spark in Databricks:
   ```python
@@ -87,15 +97,7 @@ This project focuses on ingesting, transforming, and storing data within **Azure
   ```python
    df_cleaned_coalesced = df_cleaned.coalesce(1)
 
-#### 3.1 Setting Up Databricks Workspace
-- Mounted the **raw-api** and **raw-sql** containers from ADLS Gen2 to Databricks using **secret scopes** for secure access to storage account keys.
-- Used the following Databricks code to mount the storage accounts:
 
- ```python
-  dbutils.fs.mount(
-      source="wasbs://raw-api@casestudy1new.blob.core.windows.net",
-      mount_point = "/mnt/raw-api",
-      extra_configs={"fs.azure.account.key.casestudy1new.blob.core.windows.net": dbutils.secrets.get(scope = "casestudy", key = "storage")})
 
 
 
