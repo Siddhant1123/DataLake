@@ -70,6 +70,12 @@ This project focuses on ingesting, transforming, and storing data within **Azure
 
 ### 3. Data Processing and Transformation in Databricks
 
+#### 3.2 Reading Data from Parquet and CSV 
+- Read data from `raw-api` (Parquet format) and `raw-sql` (CSV format) using Spark in Databricks:
+  ```python
+  df_parquet = spark.read.parquet("/mnt/raw-api/users.parquet")
+df_csv = spark.read.csv("/mnt/raw-sql/dbo.football.csv", header=True, inferSchema=True)
+
 #### 3.1 Setting Up Databricks Workspace
 - Mounted the **raw-api** and **raw-sql** containers from ADLS Gen2 to Databricks using **secret scopes** for secure access to storage account keys.
 - Used the following Databricks code to mount the storage accounts:
@@ -80,24 +86,8 @@ This project focuses on ingesting, transforming, and storing data within **Azure
       mount_point = "/mnt/raw-api",
       extra_configs={"fs.azure.account.key.casestudy1new.blob.core.windows.net": dbutils.secrets.get(scope = "casestudy", key = "storage")})
 
-#### 3.2 Reading Data from Parquet and CSV
-- Read data from `raw-api` (Parquet format) and `raw-sql` (CSV format) using Spark in Databricks:
 
- ```python
-df_parquet = spark.read.parquet("/mnt/raw-api/users.parquet")
-df_csv = spark.read.csv("/mnt/raw-sql/dbo.football.csv", header=True, inferSchema=True)
 
-#### 3.3 Data Cleaning and Transformation
-**Parquet Data**:
-- Filtered rows where the username was 'Samantha' and re-indexed the data based on the username.
-**CSV Data**:
-  - Filtered out players with goals less than 80 and re-assigned the `Rank` column.
-    
-#### 3.4 Repartitioning and Coalescing
-- Optimized performance by repartitioning and coalescing data:
-
-  ```python
-df_cleaned_coalesced = df_cleaned.coalesce(1)
 
 
 
