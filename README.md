@@ -98,6 +98,31 @@ This project focuses on ingesting, transforming, and storing data within **Azure
   ```python
    df_cleaned_coalesced = df_cleaned.coalesce(1)
 
+### 4. Data Saving and Staging
+
+#### 4.1 Saving Processed Data to ADLS
+- Saved cleaned and transformed data into the `processed-api` and `processed-sql` containers in ADLS Gen2:
+  ```python
+   df_cleaned_coalesced.write.mode('append').parquet("/mnt/processed-api/users_cleaned")
+
+#### 4.2 Appending Data to Staging Containers
+- Transferred the cleaned data to `staging-api` and `staging-sql` containers for final staging before final analysis or processing:
+  ```python
+   df_cleaned_coalesced.write.mode('append').parquet("/mnt/staging-api/users_cleaned")
+
+### 5. Security Best Practices
+
+**Azure Key Vault**:
+- Managed sensitive information such as storage account keys securely using Azure Key Vault. This ensures the credentials are not exposed in the code.
+
+**Secret Scopes**:
+- Databricks accessed the storage account keys securely using secret scopes to mount containers for data ingestion and saving.
+
+### 6. Conclusion
+- This project implements an end-to-end solution for ingesting, processing, and storing data in Azure Data Lake Storage (ADLS) Gen2. The solution integrates Azure Data Factory (ADF) for pipeline orchestration, Azure Databricks for data transformation, and Azure Key Vault for security.
+- By employing triggers, manual interventions, and branching strategies between Dev and QA, this project ensures smooth deployments and updates to the pipeline. The data moves securely through each stage, from ingestion to transformation and finally to staging in ADLS, ready for downstream analytics.
+- This approach ensures optimal performance, security, and scalability for data processing in Azure, laying the groundwork for further data analysis and reporting.
+
 
 
 
