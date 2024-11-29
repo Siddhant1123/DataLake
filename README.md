@@ -105,10 +105,10 @@ This project focuses on ingesting, transforming, and storing data within **Azure
   ```python
    df_cleaned_coalesced.write.mode('append').parquet("/mnt/processed-api/users_cleaned")
 
-#### 4.2 Appending Data to Staging Containers
-- Transferred the cleaned data to `staging-api` and `staging-sql` containers for final staging before final analysis or processing:
+#### 4.2 Joining Data from Processed Containers and Saving to Staging
+- Joined the data from processed-api and processed-sql containers and saved the result into a staging container for further analysis.
   ```python
-   df_cleaned_coalesced.write.mode('append').parquet("/mnt/staging-api/users_cleaned")
+   df_joined.write.mode('append').parquet("/mnt/staging/users_joined")
 
 ### 5. Security Best Practices
 
